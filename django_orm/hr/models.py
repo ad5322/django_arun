@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import date
 
 
 class Contact(models.Model):
@@ -7,10 +8,16 @@ class Contact(models.Model):
     
     def __str__(self):
         return self.phone
-
+ 
 class Department(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True,blank=True)
+    
+    def __str__(self):
+        return self.name
+    
+class Compensation(models.Model):
+    name = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name
@@ -23,6 +30,24 @@ class Employee(models.Model):
     
     department = models.ForeignKey(Department,on_delete=models.CASCADE,null=True)
     
+    compensation = models.ManyToManyField(Compensation)
+    
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+    
+    class Meta:
+        ordering = ['first_name','last_name']
+
+class Job(models.Model):
+    title = models.CharField(max_length=255)
+    employees = models.ManyToManyField(Employee,through='Assignment')
+    
+    def __str__(self):
+        return self.title
+    
+class Assignment(models.Model):
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    position = models.ForeignKey(Job,on_delete=models.CASCADE)
+    begin_date = models.DateField()
+    end_date = models.DateField(default=date(9999,12,31))
     
